@@ -47,7 +47,7 @@ public class FindAllCompensateDto {
 
         vocDto.vendorName = voc.getVendor().getName();
         vocDto.driverName = voc.getDriver().getName();
-        vocDto.driverCompany = voc.getDriver().getName();
+        vocDto.driverCompany = voc.getDriver().getCompany();
 
         vocDto.compensationAmount = voc.getCompensation().getAmount();
 

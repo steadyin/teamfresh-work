@@ -20,7 +20,7 @@ public class Compensation extends BaseEntity {
     @Column(name = "compensation_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "voc_id")
     private Voc voc;
 

@@ -8,6 +8,7 @@ import work.teamfresh.dto.FindAllCompensateDto;
 import work.teamfresh.dto.RequestCompensationDto;
 import work.teamfresh.service.CompensationService;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,11 @@ public class CompensationController {
      */
     @PostMapping
     public ResponseEntity requestCompensation(@RequestBody RequestCompensationDto requestCompensationDto) {
+        // 배상 요청 처리
         compensationService.requestCompensation(requestCompensationDto);
+        
+        // 배상 등록 처리
+        compensationService.registerCompensation(requestCompensationDto);
 
         return ResponseEntity.ok().build();
     }

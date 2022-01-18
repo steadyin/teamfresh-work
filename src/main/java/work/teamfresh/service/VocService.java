@@ -23,15 +23,18 @@ public class VocService {
     private final DriverRepository driverRepository;
     private final VendorRepository vendorRepository;
 
+    /**
+     * VOC 등록
+     */
     public Long registerVoc(RegisterVocDto registerVocDto) {
         Long vendorId = registerVocDto.getVendorId();
         Long driverId = registerVocDto.getDriverId();
         VocType vocType = registerVocDto.getVocType();
         String vocContent = registerVocDto.getVocContent();
 
-        Vendor vendor = vendorRepository.findOne(vendorId).orElseThrow(ObjectNotFoundException::new);
+        Vendor vendor = vendorRepository.findOne(vendorId).orElseThrow(()->new ObjectNotFoundException("존재하지 않는 고객사 입니다"));
 
-        Driver driver = driverRepository.findOne(driverId).orElseThrow(ObjectNotFoundException::new);
+        Driver driver = driverRepository.findOne(driverId).orElseThrow(()->new ObjectNotFoundException("존재하지 않는 운전기사 입니다"));
 
         Voc voc = Voc.createVoc(vocType, vendor, driver, vocContent);
 
@@ -40,11 +43,17 @@ public class VocService {
         return voc.getId();
     }
 
+    /**
+     * VOC 단건 조회
+     */
     @Transactional(readOnly = true)
     public Voc findVoc(Long vocId) {
-        return vocRepository.findOne(vocId).orElseThrow(ObjectNotFoundException::new);
+        return vocRepository.findOne(vocId).orElseThrow(()->new ObjectNotFoundException("존재하지 않는 VOC 입니다"));
     }
 
+    /**
+     * VOC 목록 조회
+     */
     @Transactional(readOnly = true)
     public List<Voc> findAllVoc() {
         return vocRepository.findAllVocAndCompensationAndPenalty();

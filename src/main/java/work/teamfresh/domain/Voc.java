@@ -72,7 +72,7 @@ public class Voc extends BaseEntity {
     // 배상 시스템 등록 가능 조건
     // 1. 고객사 귀책 VOC -> 배상 요청 상태
     // 2. 운송사 귀책 VOC -> 패널티 확인 상태
-    public boolean isPossibleCompensation() {
+    public boolean possibleCompensation() {
         if (vocType.equals(VocType.VENDOR) && vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) return true;
         else if (vocType.equals(VocType.DRIVER) && vocStatus.equals(VocStatus.CONFIRMED_PENALTY)) return true;
         return false;
@@ -80,7 +80,7 @@ public class Voc extends BaseEntity {
 
     // 패널티 등록 가능 조건
     // 1. 운송사 귀책 VOC -> 배상 요청 상태
-    public boolean isPossiblePenalty() {
+    public boolean possiblePenalty() {
         if (vocType.equals(VocType.DRIVER) && vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) return true;
         return false;
     }

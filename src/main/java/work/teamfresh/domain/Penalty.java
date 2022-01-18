@@ -20,7 +20,7 @@ public class Penalty extends BaseEntity {
     @Column(name = "penalty_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "voc_id")
     private Voc voc;
 
@@ -56,6 +56,7 @@ public class Penalty extends BaseEntity {
         penalty.amount = amount;
         penalty.confirmed = false;
         penalty.objected = false;
+        voc.changeVocStatus(VocStatus.REQUESTED_PENALTY);
         return penalty;
     }
 

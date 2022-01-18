@@ -25,37 +25,41 @@ public class CompensationService {
     private final VocRepository vocRepository;
 
     /**
-     * 배상 요청
+     * 배상 요청 처리
      *
-     * 배상 요청이 오면 고객사 귀책은 배상 시스템 바로 등록
-     *               운송사 귀책은 운송기사 확인 시 배송 시스템 등록
+     * 배상 등록 전 VOC 상태 REQUEST_COMPENSATION 전환
+     *
      */
-    public Optional<Long> requestCompensation(RequestCompensationDto requestCompensationDto) {
+    public void requestCompensation(RequestCompensationDto requestCompensationDto) {
         Long vocId = requestCompensationDto.getVocId();
         BigDecimal amount = requestCompensationDto.getAmount();
 
-        Voc voc = vocRepository.findOne(vocId).orElseThrow(ObjectNotFoundException::new);
+        Voc voc = vocRepository.findOne(vocId).orElseThrow(() -> new ObjectNotFoundException("존재하지 않는 VOC 입니다"));
 
-        if (voc.getVocStatus().equals(VocStatus.REQUESTED_CLAIM))
-            voc.changeVocStatus(VocStatus.REQUESTED_COMPENSATE);
-        else
-            throw new VocStatuaException("클레임 요청 상태인 VOC만 배상 요청이 가능합니다.");
-
-        // 고객사 귀책 배상 등록 처리
-        if (voc.isPossibleCompensation()) return Optional.ofNullable(registerCompensation(vocId, amount));
-        else return null;
+        if(voc.getVocStatus().equals(VocStatus.REQUESTED_CLAIM)) voc.changeVocStatus(VocStatus.REQUESTED_COMPENSATE);
+        else throw new VocStatuaException("이미 배상이 요청되었거나 VOC 처리할 수 없는 상태입니다.");
     }
 
     /**
      * 배상 등록
+     *
+     * 선행조건 : 고객사 귀책 - VOC 상태 -> REQUEST_COMPENSATION
+     *           운송사 귀책 - VOC 상태 -> PENALTY_CONFIRMED_PENALTY
      */
-    public Long registerCompensation(Long vocId, BigDecimal amount) {
-        Voc voc = vocRepository.findOne(vocId).orElseThrow(ObjectNotFoundException::new);
+    public Long registerCompensation(RequestCompensationDto requestCompensationDto) {
+        Long vocId = requestCompensationDto.getVocId();
+        BigDecimal amount = requestCompensationDto.getAmount();
+
+        Voc voc = vocRepository.findOne(vocId).orElseThrow(() -> new ObjectNotFoundException("존재하지 않는 VOC 입니다"));
+
+        // 운송사 귀책이 패널티가 등록되지 않은 경우
+        if (!voc.possibleCompensation()) throw new VocStatuaException("운송사 귀책의 경우 페널티가 선행되어야 합니다.");
 
         // VOC 상태 배상 조건 성립
-        if (voc.isPossibleCompensation()) {
+        if (voc.possibleCompensation()) {
             Compensation compensation = Compensation.createCompensation(voc, amount);
             compensationRepository.save(compensation);
+            voc.changeVocStatus(VocStatus.COMPENSATED);
 
             return compensation.getId();
         }

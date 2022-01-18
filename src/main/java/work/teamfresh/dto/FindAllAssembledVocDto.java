@@ -5,13 +5,13 @@ import work.teamfresh.domain.Voc;
 import work.teamfresh.domain.enumrate.VocStatus;
 import work.teamfresh.domain.enumrate.VocType;
 
+import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class FindAllAssembledVocDto {
-
     //VOC
     private Long vocId;
 
