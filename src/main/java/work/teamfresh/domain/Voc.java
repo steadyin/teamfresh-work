@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import work.teamfresh.common.VocStatusConverter;
 import work.teamfresh.domain.enumrate.VocStatus;
 import work.teamfresh.domain.enumrate.VocType;
+import work.teamfresh.error.exception.VocStatuaException;
 
 import javax.persistence.*;
 
@@ -26,7 +27,7 @@ public class Voc extends BaseEntity {
 
     //VOC상태 100:클레임인입 200:고객사배상요청 300:패널티청구 400:이의제기 500:패널티인정 600:배상시스템등록
     @Convert(converter = VocStatusConverter.class)
-    private VocStatus vocStatus; 
+    private VocStatus vocStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendor_id")
@@ -57,8 +58,9 @@ public class Voc extends BaseEntity {
         return voc;
     }
 
-    public void changeVocStatus(VocStatus vocStatus) {
-        this.vocStatus = vocStatus;
+    public void changeVocStatus(VocStatus toVocStatus) {
+        checkChangeStatus(toVocStatus);
+        this.vocStatus = toVocStatus;
     }
 
     public void setCompensation(Compensation compensation) {
@@ -69,20 +71,35 @@ public class Voc extends BaseEntity {
         this.penalty = penalty;
     }
 
-    // 배상 시스템 등록 가능 조건
-    // 1. 고객사 귀책 VOC -> 배상 요청 상태
-    // 2. 운송사 귀책 VOC -> 패널티 확인 상태
-    public boolean possibleCompensation() {
-        if (vocType.equals(VocType.VENDOR) && vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) return true;
-        else if (vocType.equals(VocType.DRIVER) && vocStatus.equals(VocStatus.CONFIRMED_PENALTY)) return true;
-        return false;
-    }
+    /**
+     * VOC 상태 변경 전 상태 체크를 위한 메소드
+     */
+    public void checkChangeStatus(VocStatus toVocStatus) {
+        boolean check = true;
+        switch (toVocStatus) {
+            case REQUESTED_CLAIM: // 클레임 인입 변경 시
+                break;
+            case REQUESTED_COMPENSATE: // 배상 요청 상태 변경 시
+                if (this.vocStatus.equals(VocStatus.REQUESTED_CLAIM)) check = false;
+                break;
+            case REQUESTED_PENALTY: // 패널티 요청 상태 변경 시 -> IF 운송사 귀책 VOC -> 보상 요청 상태
+                if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) check = false;
+                break;
+            case OBJECTED_PENALTY:
+            case CONFIRMED_PENALTY:
+                if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.REQUESTED_PENALTY)) check = false;
+                break;
+            case COMPENSATED: // 배상 완료 상태 변경 시 -> IF 고객사 귀책 VOC -> 배상 요청 상태, IF 운송사 귀책 VOC -> 패널티 확인 상태
+                if (this.vocType.equals(VocType.VENDOR) && this.vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) check = false;
+                else if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.CONFIRMED_PENALTY)) check = false;
+                break;
+            case CANCELD:
+                //현재 취소 처리 기능 미구현
+                break;
+            default: check = true;
+        }
 
-    // 패널티 등록 가능 조건
-    // 1. 운송사 귀책 VOC -> 배상 요청 상태
-    public boolean possiblePenalty() {
-        if (vocType.equals(VocType.DRIVER) && vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) return true;
-        return false;
+        if(check) throw new VocStatuaException(String.format("VOC 상태 [ %s ] 전환할 수 없습니다. 현재 VOC 상태가 [ %s ] 입니다.",toVocStatus, this.vocStatus));
     }
 }
 

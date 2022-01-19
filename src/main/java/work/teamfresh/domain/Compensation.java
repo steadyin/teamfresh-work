@@ -24,6 +24,7 @@ public class Compensation extends BaseEntity {
     @JoinColumn(name = "voc_id")
     private Voc voc;
 
+    //배상 금액
     private BigDecimal amount;
 
     // 연관관계 메소드

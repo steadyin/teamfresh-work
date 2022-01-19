@@ -27,17 +27,18 @@ public class CompensationService {
     /**
      * 배상 요청 처리
      *
-     * 배상 등록 전 VOC 상태 REQUEST_COMPENSATION 전환
+     * 선행조건 : VOC 상태 -> REQUEST_CLAIM 전환
      *
      */
-    public void requestCompensation(RequestCompensationDto requestCompensationDto) {
+    public Voc requestCompensation(RequestCompensationDto requestCompensationDto) {
         Long vocId = requestCompensationDto.getVocId();
         BigDecimal amount = requestCompensationDto.getAmount();
 
         Voc voc = vocRepository.findOne(vocId).orElseThrow(() -> new ObjectNotFoundException("존재하지 않는 VOC 입니다"));
 
-        if(voc.getVocStatus().equals(VocStatus.REQUESTED_CLAIM)) voc.changeVocStatus(VocStatus.REQUESTED_COMPENSATE);
-        else throw new VocStatuaException("이미 배상이 요청되었거나 VOC 처리할 수 없는 상태입니다.");
+        voc.changeVocStatus(VocStatus.REQUESTED_COMPENSATE);
+
+        return voc;
     }
 
     /**
@@ -53,20 +54,12 @@ public class CompensationService {
         Voc voc = vocRepository.findOne(vocId).orElseThrow(() -> new ObjectNotFoundException("존재하지 않는 VOC 입니다"));
 
         // 운송사 귀책이 패널티가 등록되지 않은 경우
-        if (!voc.possibleCompensation()) throw new VocStatuaException("운송사 귀책의 경우 페널티가 선행되어야 합니다.");
+        voc.changeVocStatus(VocStatus.COMPENSATED);
 
-        // VOC 상태 배상 조건 성립
-        if (voc.possibleCompensation()) {
-            Compensation compensation = Compensation.createCompensation(voc, amount);
-            compensationRepository.save(compensation);
-            voc.changeVocStatus(VocStatus.COMPENSATED);
+        Compensation compensation = Compensation.createCompensation(voc, amount);
+        compensationRepository.save(compensation);
 
-            return compensation.getId();
-        }
-        // VOC 상태 배상 조건 불성립
-        else {
-            throw new VocStatuaException();
-        }
+        return compensation.getId();
     }
 
     /**

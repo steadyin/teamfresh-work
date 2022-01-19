@@ -30,7 +30,7 @@ public class PenaltyService {
     /**
      * 페널티 등록
      *
-     * 선행조건 : VOC 상태 - REQUEST_COMPENSATION
+     * 선행조건 : VOC 상태 -> REQUEST_COMPENSATION
      *
      */
     public Long registerPenalty(RegisterPenaltyDto registerPenaltyDto) {
@@ -39,33 +39,27 @@ public class PenaltyService {
 
         Voc voc = vocRepository.findOne(vocId).orElseThrow(()->new ObjectNotFoundException("존재하지 않는 VOC ID 입니다"));
 
-        if (voc.possiblePenalty()) {
-            Penalty penalty = Penalty.createPenalty(voc, amount);
-            penaltyRepository.save(penalty);
-            return penalty.getId();
-        } else {
-            throw new VocStatuaException("페널티를 등록할 수 없습니다.");
-        }
+        Penalty penalty = Penalty.createPenalty(voc, amount);
+        penaltyRepository.save(penalty);
+        return penalty.getId();
     }
 
     /**
      * 페널티 확인 여부 등록
      *
-     * 선행조건 : VOC 상태 - REQUESTED_PENALTY
+     * 선행조건 : VOC 상태 -> REQUESTED_PENALTY
      *
      */
     public void confirmPenalty(Long penaltyId) {
         Penalty penalty = penaltyRepository.findOne(penaltyId).orElseThrow(()->new ObjectNotFoundException("존재하지 않는 페널티 입니다"));
 
-        if(!penalty.getVoc().getVocStatus().equals(VocStatus.REQUESTED_PENALTY)) {
-            throw new VocStatuaException("페널티가 처리할 수 없는 상태입니다");
-        }
-
+        // 패널티 확인 처리, VOC 상태 변경 처리
         penalty.confirmed();
 
         RequestCompensationDto requestCompensationDto = new RequestCompensationDto();
         requestCompensationDto.setVocId(penalty.getVoc().getId());
         requestCompensationDto.setAmount(penalty.getAmount());
+
         // 배송기사 페널티 확인 후 배상시스템 바로 등록
         compensationService.registerCompensation(requestCompensationDto);
     }
@@ -73,15 +67,13 @@ public class PenaltyService {
     /**
      * 페널티 이의 여부 등록
      *
-     * 선행조건 : VOC 상태 - REQUESTED_PENALTY
+     * 선행조건 : VOC 상태 -> REQUESTED_PENALTY
      *
      */
     public void objectedPenalty(Long penaltyId, ObjectPenaltyDto objectPenaltyDto) {
         Penalty penalty = penaltyRepository.findOne(penaltyId).orElseThrow(()->new ObjectNotFoundException("존재하지 않는 페널티 입니다"));
+
         Voc voc = penalty.getVoc();
-        if(!penalty.getVoc().getVocStatus().equals(VocStatus.REQUESTED_PENALTY)) {
-            throw new VocStatuaException("페널티가 처리할 수 없는 상태입니다");
-        }
 
         String objectContent = objectPenaltyDto.getObjectContent();
 

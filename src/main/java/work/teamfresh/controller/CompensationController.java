@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import work.teamfresh.domain.Compensation;
+import work.teamfresh.domain.Voc;
+import work.teamfresh.domain.enumrate.VocType;
 import work.teamfresh.dto.FindAllCompensateDto;
 import work.teamfresh.dto.RequestCompensationDto;
 import work.teamfresh.service.CompensationService;
@@ -35,10 +37,11 @@ public class CompensationController {
     @PostMapping
     public ResponseEntity requestCompensation(@RequestBody RequestCompensationDto requestCompensationDto) {
         // 배상 요청 처리
-        compensationService.requestCompensation(requestCompensationDto);
+        Voc voc = compensationService.requestCompensation(requestCompensationDto);
         
-        // 배상 등록 처리
-        compensationService.registerCompensation(requestCompensationDto);
+        // 고객사 귀책이면 바로 배상 등록 처리
+        if(voc.getVocType().equals(VocType.VENDOR))
+            compensationService.registerCompensation(requestCompensationDto);
 
         return ResponseEntity.ok().build();
     }

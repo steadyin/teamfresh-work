@@ -8,7 +8,7 @@ public enum ErrorCode {
     // Common
     INTERNAL_SERVER_ERROR(500, "E001", "Server Error"),
     VOC_STATUS_ERROR(400, "E002", "VOC Status Error"),
-    OBJECT_NOT_FOUND(400, "E003", "OBJECT Not Found");
+    OBJECT_NOT_FOUND(400, "E003", "Object Not Found");
 
     ;
 

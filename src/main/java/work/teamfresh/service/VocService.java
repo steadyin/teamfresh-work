@@ -25,6 +25,7 @@ public class VocService {
 
     /**
      * VOC 등록
+     *
      */
     public Long registerVoc(RegisterVocDto registerVocDto) {
         Long vendorId = registerVocDto.getVendorId();

@@ -15,3 +15,8 @@ spring:
         format_sql: true
     generate-ddl: true
     defer-datasource-initialization: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace

@@ -1,11 +1,12 @@
 package work.teamfresh.dto;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import work.teamfresh.domain.Voc;
 import work.teamfresh.domain.enumrate.VocStatus;
 import work.teamfresh.domain.enumrate.VocType;
 
-import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 
 @Getter
@@ -37,6 +38,8 @@ public class FindAllAssembledVocDto {
     private BigDecimal compensationAmount;
 
     //PENALTY
+    private BigDecimal penaltyAmount;
+
     private Boolean confirmed;
 
     private Boolean objected;
@@ -61,6 +64,7 @@ public class FindAllAssembledVocDto {
             vocDto.compensationAmount = voc.getCompensation().getAmount();
         }
         if (voc.getPenalty() != null) {
+            vocDto.penaltyAmount = voc.getPenalty().getAmount();
             vocDto.confirmed = voc.getPenalty().getConfirmed();
             vocDto.objected = voc.getPenalty().getObjected();
             vocDto.objectionContent = voc.getPenalty().getObjectContent();
