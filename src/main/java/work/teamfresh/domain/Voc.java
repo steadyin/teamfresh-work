@@ -75,31 +75,31 @@ public class Voc extends BaseEntity {
      * VOC 상태 변경 전 상태 체크를 위한 메소드
      */
     public void checkChangeStatus(VocStatus toVocStatus) {
-        boolean check = true;
+        boolean check = false;
         switch (toVocStatus) {
             case REQUESTED_CLAIM: // 클레임 인입 변경 시
                 break;
             case REQUESTED_COMPENSATE: // 배상 요청 상태 변경 시
-                if (this.vocStatus.equals(VocStatus.REQUESTED_CLAIM)) check = false;
+                if (this.vocStatus.equals(VocStatus.REQUESTED_CLAIM)) check = true;
                 break;
             case REQUESTED_PENALTY: // 패널티 요청 상태 변경 시 -> IF 운송사 귀책 VOC -> 보상 요청 상태
-                if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) check = false;
+                if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) check = true;
                 break;
             case OBJECTED_PENALTY:
             case CONFIRMED_PENALTY:
-                if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.REQUESTED_PENALTY)) check = false;
+                if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.REQUESTED_PENALTY)) check = true;
                 break;
             case COMPENSATED: // 배상 완료 상태 변경 시 -> IF 고객사 귀책 VOC -> 배상 요청 상태, IF 운송사 귀책 VOC -> 패널티 확인 상태
-                if (this.vocType.equals(VocType.VENDOR) && this.vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) check = false;
-                else if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.CONFIRMED_PENALTY)) check = false;
+                if (this.vocType.equals(VocType.VENDOR) && this.vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) check = true;
+                else if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.CONFIRMED_PENALTY)) check = true;
                 break;
             case CANCELD:
                 //현재 취소 처리 기능 미구현
                 break;
-            default: check = true;
+            default: throw new VocStatuaException("현재 상태를 확인할 수 없습니다.");
         }
 
-        if(check) throw new VocStatuaException(String.format("VOC 상태 [ %s ] 전환할 수 없습니다. 현재 VOC 상태가 [ %s ] 입니다.",toVocStatus, this.vocStatus));
+        if(! check) throw new VocStatuaException(String.format("VOC 상태 [ %s ] 전환할 수 없습니다. 현재 VOC 상태가 [ %s ] 입니다.",toVocStatus, this.vocStatus));
     }
 }
 

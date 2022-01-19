@@ -35,9 +35,13 @@ public class FindAllAssembledVocDto {
     private String driverCompany;
 
     //COMPENSATION
+    private Long compensationId;
+
     private BigDecimal compensationAmount;
 
     //PENALTY
+    private Long penaltyId;
+
     private BigDecimal penaltyAmount;
 
     private Boolean confirmed;
@@ -61,9 +65,11 @@ public class FindAllAssembledVocDto {
         vocDto.driverCompany = voc.getDriver().getCompany();
 
         if (voc.getCompensation() != null) {
+            vocDto.compensationId = voc.getCompensation().getId();
             vocDto.compensationAmount = voc.getCompensation().getAmount();
         }
         if (voc.getPenalty() != null) {
+            vocDto.penaltyId = voc.getPenalty().getId();
             vocDto.penaltyAmount = voc.getPenalty().getAmount();
             vocDto.confirmed = voc.getPenalty().getConfirmed();
             vocDto.objected = voc.getPenalty().getObjected();

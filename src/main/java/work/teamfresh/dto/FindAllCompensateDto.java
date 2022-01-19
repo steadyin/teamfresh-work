@@ -33,7 +33,9 @@ public class FindAllCompensateDto {
     private String driverCompany;
 
     //COMPENSATION
+    private Long compensationId;
     private BigDecimal compensationAmount;
+
 
     public static FindAllCompensateDto EntityToDto(Compensation compensation) {
         FindAllCompensateDto vocDto = new FindAllCompensateDto();
@@ -49,6 +51,7 @@ public class FindAllCompensateDto {
         vocDto.driverName = voc.getDriver().getName();
         vocDto.driverCompany = voc.getDriver().getCompany();
 
+        vocDto.compensationId = voc.getCompensation().getId();
         vocDto.compensationAmount = voc.getCompensation().getAmount();
 
         return vocDto;
