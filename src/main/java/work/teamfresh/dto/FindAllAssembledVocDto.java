@@ -1,10 +1,10 @@
 package work.teamfresh.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import work.teamfresh.domain.Voc;
-import work.teamfresh.domain.enumrate.VocStatus;
 import work.teamfresh.domain.enumrate.VocType;
 
 import java.math.BigDecimal;
@@ -18,7 +18,8 @@ public class FindAllAssembledVocDto {
 
     private VocType vocType;
 
-    private VocStatus vocStatus;
+    @JsonProperty("isReceivedCompensation")
+    private boolean isReceivedCompensation;
 
     private String content;
 
@@ -44,9 +45,11 @@ public class FindAllAssembledVocDto {
 
     private BigDecimal penaltyAmount;
 
-    private Boolean confirmed;
+    @JsonProperty("isConfirmed")
+    private boolean isConfirmed;
 
-    private Boolean objected;
+    @JsonProperty("isObjected")
+    private boolean isObjected;
 
     private String objectionContent;
 
@@ -54,7 +57,7 @@ public class FindAllAssembledVocDto {
         FindAllAssembledVocDto vocDto = new FindAllAssembledVocDto();
         vocDto.vocId = voc.getId();
         vocDto.vocType = voc.getVocType();
-        vocDto.vocStatus = voc.getVocStatus();
+        vocDto.isReceivedCompensation = voc.isReceivedCompensation();
         vocDto.content = voc.getContent();
 
         vocDto.vendorName = voc.getVendor().getName();
@@ -71,8 +74,8 @@ public class FindAllAssembledVocDto {
         if (voc.getPenalty() != null) {
             vocDto.penaltyId = voc.getPenalty().getId();
             vocDto.penaltyAmount = voc.getPenalty().getAmount();
-            vocDto.confirmed = voc.getPenalty().getConfirmed();
-            vocDto.objected = voc.getPenalty().getObjected();
+            vocDto.isConfirmed = voc.getPenalty().isConfirmed();
+            vocDto.isObjected = voc.getPenalty().isObjected();
             vocDto.objectionContent = voc.getPenalty().getObjectContent();
         }
 

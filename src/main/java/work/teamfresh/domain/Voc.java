@@ -3,8 +3,6 @@ package work.teamfresh.domain;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import work.teamfresh.common.VocStatusConverter;
-import work.teamfresh.domain.enumrate.VocStatus;
 import work.teamfresh.domain.enumrate.VocType;
 import work.teamfresh.error.exception.VocStatuaException;
 
@@ -25,10 +23,6 @@ public class Voc extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private VocType vocType;
 
-    //VOC상태 100:클레임인입 200:고객사배상요청 300:패널티청구 400:이의제기 500:패널티인정 600:배상시스템등록
-    @Convert(converter = VocStatusConverter.class)
-    private VocStatus vocStatus;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendor_id")
     private Vendor vendor;
@@ -47,22 +41,22 @@ public class Voc extends BaseEntity {
     @OneToOne(mappedBy = "voc")
     private Penalty penalty;
 
+    // 배상 접수 여부
+    private boolean isReceivedCompensation;
+
+    // 생성 메소드
     public static Voc createVoc(VocType vocType, Vendor vendor, Driver driver, String content) {
         Voc voc = new Voc();
         voc.vocType = vocType;
         voc.vendor = vendor;
         voc.driver = driver;
         voc.content = content;
-        voc.vocStatus = VocStatus.REQUESTED_CLAIM;
+        voc.isReceivedCompensation = false;
 
         return voc;
     }
 
-    public void changeVocStatus(VocStatus toVocStatus) {
-        checkChangeStatus(toVocStatus);
-        this.vocStatus = toVocStatus;
-    }
-
+    // 연관관계 메소드
     public void setCompensation(Compensation compensation) {
         this.compensation = compensation;
     }
@@ -71,35 +65,39 @@ public class Voc extends BaseEntity {
         this.penalty = penalty;
     }
 
-    /**
-     * VOC 상태 변경 전 상태 체크를 위한 메소드
-     */
-    public void checkChangeStatus(VocStatus toVocStatus) {
-        boolean check = false;
-        switch (toVocStatus) {
-            case REQUESTED_CLAIM: // 클레임 인입 변경 시
-                break;
-            case REQUESTED_COMPENSATE: // 배상 요청 상태 변경 시
-                if (this.vocStatus.equals(VocStatus.REQUESTED_CLAIM)) check = true;
-                break;
-            case REQUESTED_PENALTY: // 패널티 요청 상태 변경 시 -> IF 운송사 귀책 VOC -> 보상 요청 상태
-                if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) check = true;
-                break;
-            case OBJECTED_PENALTY:
-            case CONFIRMED_PENALTY:
-                if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.REQUESTED_PENALTY)) check = true;
-                break;
-            case COMPENSATED: // 배상 완료 상태 변경 시 -> IF 고객사 귀책 VOC -> 배상 요청 상태, IF 운송사 귀책 VOC -> 패널티 확인 상태
-                if (this.vocType.equals(VocType.VENDOR) && this.vocStatus.equals(VocStatus.REQUESTED_COMPENSATE)) check = true;
-                else if (this.vocType.equals(VocType.DRIVER) && this.vocStatus.equals(VocStatus.CONFIRMED_PENALTY)) check = true;
-                break;
-            case CANCELD:
-                //현재 취소 처리 기능 미구현
-                break;
-            default: throw new VocStatuaException("현재 상태를 확인할 수 없습니다.");
-        }
+    // VOC 배상 접수
+    public void receiveCompensation() {
+        possibleReceiveCompensation();
+        this.isReceivedCompensation = true;
+    }
 
-        if(! check) throw new VocStatuaException(String.format("VOC 상태 [ %s ] 전환할 수 없습니다. 현재 VOC 상태가 [ %s ] 입니다.",toVocStatus, this.vocStatus));
+    // 조건 체크 메소드
+    
+    // 배상 접수 가능 조건
+    public void possibleReceiveCompensation() {
+        if(this.isReceivedCompensation)
+            throw new VocStatuaException("이미 배상이 접수 된 VOC입니다");
+    }
+
+    // 페널티 등록 가능 조건
+    public void possiblePenalty() {
+        if(this.vocType==VocType.VENDOR)
+            throw new VocStatuaException("고객사 귀책은 페널티를 등록할 수 없습니다");
+        else if(this.vocType==VocType.DRIVER && !this.isReceivedCompensation)
+            throw new VocStatuaException("배상이 접수 되지 않은 VOC는 페널티를 등록할 수 없습니다.");
+        else if(this.vocType==VocType.DRIVER && this.penalty!=null)
+            throw new VocStatuaException("이미 페널티가 발급 된 VOC입니다");
+
+    }
+
+    // 배상 시스템 등록 가능 조건
+    public void possibleCompensation() {
+        if(this.vocType==VocType.VENDOR && !this.isReceivedCompensation)
+            throw new VocStatuaException("배상이 접수 되지 않은 VOC는 배상 시스템에 등록할 수 없습니다.");
+        else if(this.vocType==VocType.DRIVER && this.penalty==null)
+            throw new VocStatuaException("페널티가 등록 되지 않은 VOC는 배상 시스템에 등록할 수 없습니다.");
+        else if(this.vocType==VocType.DRIVER && !this.penalty.isConfirmed())
+            throw new VocStatuaException("기사님이 확인하지 않은 VOC는 배상 시스템에 등록할 수 없습니다.");
     }
 }
 

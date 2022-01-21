@@ -1,11 +1,11 @@
 package work.teamfresh.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import work.teamfresh.domain.Compensation;
 import work.teamfresh.domain.Voc;
-import work.teamfresh.domain.enumrate.VocStatus;
 import work.teamfresh.domain.enumrate.VocType;
 
 import java.math.BigDecimal;
@@ -20,8 +20,6 @@ public class FindAllCompensateDto {
 
     private VocType vocType;
 
-    private VocStatus vocStatus;
-
     private String content;
 
     //VENDOR
@@ -34,6 +32,7 @@ public class FindAllCompensateDto {
 
     //COMPENSATION
     private Long compensationId;
+
     private BigDecimal compensationAmount;
 
 
@@ -44,7 +43,6 @@ public class FindAllCompensateDto {
 
         vocDto.vocId = voc.getId();
         vocDto.vocType = voc.getVocType();
-        vocDto.vocStatus = voc.getVocStatus();
         vocDto.content = voc.getContent();
 
         vocDto.vendorName = voc.getVendor().getName();

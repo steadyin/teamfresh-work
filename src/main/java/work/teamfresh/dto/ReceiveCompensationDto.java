@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RequestCompensationDto {
+public class ReceiveCompensationDto {
     private Long vocId;
     private BigDecimal amount;
 }

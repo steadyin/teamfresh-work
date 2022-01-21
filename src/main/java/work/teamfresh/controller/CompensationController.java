@@ -7,10 +7,9 @@ import work.teamfresh.domain.Compensation;
 import work.teamfresh.domain.Voc;
 import work.teamfresh.domain.enumrate.VocType;
 import work.teamfresh.dto.FindAllCompensateDto;
-import work.teamfresh.dto.RequestCompensationDto;
+import work.teamfresh.dto.ReceiveCompensationDto;
 import work.teamfresh.service.CompensationService;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,16 +31,16 @@ public class CompensationController {
     }
 
     /**
-     * 배상 요청 API
+     * 배상 접수 API
      */
     @PostMapping
-    public ResponseEntity requestCompensation(@RequestBody RequestCompensationDto requestCompensationDto) {
-        // 배상 요청 처리
-        Voc voc = compensationService.requestCompensation(requestCompensationDto);
+    public ResponseEntity receiveCompensation(@RequestBody ReceiveCompensationDto receiveCompensationDto) {
+        // 배상 접수 처리
+        Voc voc = compensationService.receiveCompensation(receiveCompensationDto);
         
-        // 고객사 귀책이면 바로 배상 등록 처리
-        if(voc.getVocType().equals(VocType.VENDOR))
-            compensationService.registerCompensation(requestCompensationDto);
+        // 고객사 귀책이면 바로 배상 시스템 등록 처리
+        if(voc.getVocType()==VocType.VENDOR)
+            compensationService.registerCompensation(receiveCompensationDto);
 
         return ResponseEntity.ok().build();
     }

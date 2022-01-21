@@ -3,7 +3,6 @@ package work.teamfresh.domain;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import work.teamfresh.domain.enumrate.VocStatus;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -24,7 +23,7 @@ public class Compensation extends BaseEntity {
     @JoinColumn(name = "voc_id")
     private Voc voc;
 
-    //배상 금액
+    // 배상 금액
     private BigDecimal amount;
 
     // 연관관계 메소드
