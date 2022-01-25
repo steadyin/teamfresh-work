@@ -25,8 +25,8 @@ public class PenaltyService {
     /**
      * 페널티 등록
      */
-    public Long registerPenalty(RegisterPenaltyDto registerPenaltyDto) {
-        Long vocId = registerPenaltyDto.getVocId();
+    public Long registerPenalty(Long pathVocId, RegisterPenaltyDto registerPenaltyDto) {
+        Long vocId = pathVocId;
         BigDecimal amount = registerPenaltyDto.getAmount();
 
         Voc voc = vocRepository.findOne(vocId).orElseThrow(()->new ObjectNotFoundException("존재하지 않는 VOC ID 입니다"));
@@ -49,18 +49,14 @@ public class PenaltyService {
         penalty.confirm();
 
         ReceiveCompensationDto receiveCompensationDto = new ReceiveCompensationDto();
-        receiveCompensationDto.setVocId(penalty.getVoc().getId());
         receiveCompensationDto.setAmount(penalty.getAmount());
 
         // 배송기사 페널티 확인 후 배상시스템 바로 등록
-        compensationService.registerCompensation(receiveCompensationDto);
+        compensationService.registerCompensation(penalty.getVoc().getId(), receiveCompensationDto);
     }
 
     /**
      * 페널티 이의 여부 등록
-     *
-     * 선행조건 : VOC 상태 -> REQUESTED_PENALTY
-     *
      */
     public void objectedPenalty(Long penaltyId, ObjectPenaltyDto objectPenaltyDto) {
         Penalty penalty = penaltyRepository.findOne(penaltyId).orElseThrow(()->new ObjectNotFoundException("존재하지 않는 페널티 입니다"));

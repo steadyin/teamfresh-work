@@ -10,6 +10,5 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 public class ReceiveCompensationDto {
-    private Long vocId;
     private BigDecimal amount;
 }

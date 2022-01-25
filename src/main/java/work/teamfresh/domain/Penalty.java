@@ -20,7 +20,7 @@ public class Penalty extends BaseEntity {
     @Column(name = "penalty_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "voc_id")
     private Voc voc;
 

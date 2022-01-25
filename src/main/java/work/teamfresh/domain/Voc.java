@@ -34,7 +34,7 @@ public class Voc extends BaseEntity {
     // 귀책 내용
     private String content;
 
-    // 귀책 당사자
+    // 배상
     @OneToOne(mappedBy = "voc")
     private Compensation compensation;
 

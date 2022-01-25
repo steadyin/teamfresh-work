@@ -1,11 +1,8 @@
 package work.teamfresh.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import work.teamfresh.domain.Compensation;
-import work.teamfresh.domain.Voc;
 import work.teamfresh.domain.enumrate.VocType;
 
 import java.math.BigDecimal;
@@ -35,23 +32,14 @@ public class FindAllCompensateDto {
 
     private BigDecimal compensationAmount;
 
-
-    public static FindAllCompensateDto EntityToDto(Compensation compensation) {
-        FindAllCompensateDto vocDto = new FindAllCompensateDto();
-
-        Voc voc = compensation.getVoc();
-
-        vocDto.vocId = voc.getId();
-        vocDto.vocType = voc.getVocType();
-        vocDto.content = voc.getContent();
-
-        vocDto.vendorName = voc.getVendor().getName();
-        vocDto.driverName = voc.getDriver().getName();
-        vocDto.driverCompany = voc.getDriver().getCompany();
-
-        vocDto.compensationId = voc.getCompensation().getId();
-        vocDto.compensationAmount = voc.getCompensation().getAmount();
-
-        return vocDto;
+    public FindAllCompensateDto(Long vocId, VocType vocType, String content, String vendorName, String driverName, String driverCompany, Long compensationId, BigDecimal compensationAmount) {
+        this.vocId = vocId;
+        this.vocType = vocType;
+        this.content = content;
+        this.vendorName = vendorName;
+        this.driverName = driverName;
+        this.driverCompany = driverCompany;
+        this.compensationId = compensationId;
+        this.compensationAmount = compensationAmount;
     }
 }

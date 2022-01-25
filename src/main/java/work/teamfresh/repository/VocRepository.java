@@ -23,7 +23,7 @@ public class VocRepository {
     }
 
     public List<Voc> findAllVocAndCompensationAndPenalty() {
-        return em.createQuery("select v from Voc v left join fetch v.compensation left join fetch v.penalty", Voc.class)
+        return em.createQuery("select v from Voc v left outer join fetch v.compensation left outer join fetch v.penalty join fetch v.driver join fetch v.vendor", Voc.class)
                 .getResultList();
     }
 }

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import work.teamfresh.dto.ObjectPenaltyDto;
-import work.teamfresh.dto.RegisterPenaltyDto;
 import work.teamfresh.service.PenaltyService;
 
 @RestController
@@ -12,15 +11,6 @@ import work.teamfresh.service.PenaltyService;
 @RequiredArgsConstructor
 public class PenaltyController {
     private final PenaltyService penaltyService;
-
-    /**
-     * 페널티 등록 API
-     */
-    @PostMapping
-    public ResponseEntity registerPenalty(@RequestBody RegisterPenaltyDto registerPenalty) {
-        penaltyService.registerPenalty(registerPenalty);
-        return ResponseEntity.ok().build();
-    }
 
     /**
      * 페널티 확인 API

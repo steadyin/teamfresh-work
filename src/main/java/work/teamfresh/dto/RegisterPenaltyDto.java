@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 public class RegisterPenaltyDto {
-    private Long vocId;
     private BigDecimal amount;
 }
 
